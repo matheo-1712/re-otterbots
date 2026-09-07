@@ -1,0 +1,27 @@
+{
+  "name": "re-otterbots",
+  "version": "0.1.0",
+  "description": "Re:start Otterbots from zero",
+  "homepage": "https://github.com/matheo-1712/re-otterbots#readme",
+  "bugs": {
+    "url": "https://github.com/matheo-1712/re-otterbots/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matheo-1712/re-otterbots.git"
+  },
+  "license": "ISC",
+  "author": "matheo-1712",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "discord.js": "^14.27.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.10.0"
+  }
+}
