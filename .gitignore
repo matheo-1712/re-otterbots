@@ -1,0 +1,54 @@
+# Dépendances
+node_modules/
+.npm/
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+
+# Tests & couverture
+coverage/
+.vitest/
+
+# Environnement / secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Caches outils
+.eslintcache
+.cache/
+
+# OS / éditeurs
+.DS_Store
+Thumbs.db
+# WebStorm : on versionne les réglages partageables, pas l'état local
+.idea/*
+!.idea/runConfigurations/
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/jsLinters/
+!.idea/prettier.xml
+!.idea/vcs.xml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries/
+.idea/shelf/
+.idea/httpRequests/
+.idea/sonarlint/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Données locales du bot
+*.sqlite
+*.sqlite3
+data/

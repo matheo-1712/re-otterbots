@@ -1,0 +1,37 @@
+name: 🔧 Tâche technique
+description: Refactor, dette technique, outillage, CI, documentation
+title: '[chore] '
+labels:
+  - chore
+body:
+  - type: textarea
+    id: objectif
+    attributes:
+      label: Objectif
+      description: Ce qu'il faut faire, et pourquoi maintenant.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: domaine
+    attributes:
+      label: Domaine
+      options:
+        - Moteur (src/)
+        - Exemples (examples/)
+        - Tests (tests/)
+        - Outillage / CI
+        - Documentation
+    validations:
+      required: true
+
+  - type: textarea
+    id: definition-of-done
+    attributes:
+      label: Critères de fin
+      description: À quoi sait-on que c'est terminé ?
+      value: |
+        - [ ]
+        - [ ] `npm run check` passe
+    validations:
+      required: false

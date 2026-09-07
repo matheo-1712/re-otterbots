@@ -1,0 +1,92 @@
+name: 🐛 Bug
+description: Signaler un comportement incorrect du moteur
+title: '[bug] '
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Avant d'ouvrir : vérifie que le problème vient bien du moteur et non de
+        la configuration du bot (intents manquants, commandes non déployées,
+        token d'une autre application).
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Que se passe-t-il, et qu'attendais-tu à la place ?
+      placeholder: |
+        Attendu : la commande répond en éphémère.
+        Constaté : la réponse est visible par tout le salon.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Les étapes minimales, ou mieux, un bout de code isolé.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Code concerné
+      description: Définition de commande, d'event ou options passées à `createBot`.
+      render: typescript
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs et stack trace
+      description: Sortie complète de l'erreur. Colle le texte brut, pas une capture.
+      render: shell
+    validations:
+      required: false
+
+  - type: input
+    id: engine-version
+    attributes:
+      label: Version de re-otterbots
+      placeholder: 0.1.0 — ou le SHA du commit
+    validations:
+      required: true
+
+  - type: input
+    id: discordjs-version
+    attributes:
+      label: Version de discord.js
+      description: '`npm ls discord.js`'
+      placeholder: 14.16.3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: node-version
+    attributes:
+      label: Version de Node
+      options:
+        - '20.x'
+        - '22.x'
+        - '24.x'
+        - Autre (préciser dans la description)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: verifications
+    attributes:
+      label: Vérifications
+      options:
+        - label: J'ai cherché une issue existante sur le même sujet.
+          required: true
+        - label: J'ai retiré tout token ou identifiant des logs collés ci-dessus.
+          required: true

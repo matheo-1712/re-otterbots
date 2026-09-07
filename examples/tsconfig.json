@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "noEmit": true,
+    "baseUrl": "..",
+    "paths": {
+      /* Les exemples importent le moteur par son nom de package, exactement
+         comme le ferait un vrai projet — mais résolu vers les sources locales. */
+      "re-otterbots": ["src/index.ts"],
+      "#/*": ["src/*"],
+      "#test/*": ["tests/*"]
+    }
+  },
+  "include": ["./**/*.ts", "../src/**/*.ts", "../tests/**/*.ts"],
+  "exclude": ["../node_modules", "../dist"]
+}

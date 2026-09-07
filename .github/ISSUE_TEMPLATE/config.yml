@@ -1,0 +1,10 @@
+# Les issues vierges restent autorisées : sur un projet solo, s'imposer un
+# formulaire pour noter une idée en trois mots est contre-productif.
+blank_issues_enabled: true
+contact_links:
+  - name: 📚 Documentation du moteur
+    url: https://github.com/matheo-1712/re-otterbots#readme
+    about: Scripts, structure du projet et contrat d'API avant d'ouvrir une issue.
+  - name: 💬 Documentation discord.js
+    url: https://discord.js.org/docs
+    about: Pour une question sur discord.js lui-même plutôt que sur le moteur.
