@@ -1,6 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="16. Debug : exemple (points d'arret)" type="NodeJSConfigurationType" node-parameters="--import tsx --env-file=examples/.env" path-to-js-file="examples/basic-bot/index.ts" working-dir="$PROJECT_DIR$">
-    <envs />
-    <method v="2" />
-  </configuration>
-</component>
