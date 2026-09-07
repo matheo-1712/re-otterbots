@@ -1,2 +1,2 @@
 # Re:Otterbots 
-Re:Start Otterbots from zero
+*Re:start [Otterbots](https://github.com/L-Antre-des-Loutres/Otterbots) from zero*
