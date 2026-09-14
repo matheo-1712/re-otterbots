@@ -1,3 +1,4 @@
+import { GatewayIntentBits } from 'discord.js';
 import { Otterbots } from './index';
 
 // Charge le .env s'il existe, sinon on s'appuie sur les variables d'environnement
@@ -18,7 +19,12 @@ function loadToken(): string {
 	return token;
 }
 
-const bot = new Otterbots(loadToken());
+// MessageContent est privilégié : il doit aussi être activé sur le Developer Portal
+const bot = new Otterbots(loadToken(), [
+	GatewayIntentBits.Guilds,
+	GatewayIntentBits.GuildMessages,
+	GatewayIntentBits.MessageContent,
+]);
 
 // Déconnecte le bot avant de quitter (Ctrl+C, arrêt du conteneur…)
 async function shutdown(signal: NodeJS.Signals): Promise<void> {

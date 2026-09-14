@@ -12,6 +12,7 @@ const style = {
 	dim: (text: string) => paint('2', text),
 	accent: (text: string) => paint('38;5;80', text),
 	success: (text: string) => paint('38;5;114', text),
+	warning: (text: string) => paint('38;5;214', text),
 };
 
 // Lettres du titre « Re:Otterbots » (police figlet small), 4 lignes chacune
@@ -53,6 +54,31 @@ function renderInfoBox(rows: [string, string][]): string[] {
 	return [style.dim(`╭${border}╮`), ...lines, style.dim(`╰${border}╯`)];
 }
 
+// Avertissements reçus avant la fin de la connexion, affichés sous l'écran d'accueil
+const pendingWarnings: string[] = [];
+let warningsReleased = false;
+
+function writeWarning(message: string): void {
+	console.warn(`  ${style.warning('▲')} ${style.dim('[discord.js]')} ${message}`);
+}
+
+export function printWarning(message: string): void {
+	if (warningsReleased) {
+		writeWarning(message);
+	}
+	else {
+		pendingWarnings.push(message);
+	}
+}
+
+// Affiche les avertissements en attente ; les suivants s'afficheront directement
+export function releaseWarnings(): void {
+	warningsReleased = true;
+	for (const message of pendingWarnings.splice(0)) {
+		writeWarning(message);
+	}
+}
+
 export function printConnecting(): void {
 	console.log(style.dim('Connexion à Discord…'));
 }
@@ -82,4 +108,5 @@ export function printReadyBanner(client: Client<true>, startupMs: number): void 
 	];
 
 	console.log(output.map((line) => (line ? `  ${line}` : line)).join('\n'));
+	releaseWarnings();
 }
