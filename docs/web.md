@@ -25,7 +25,7 @@ Aucune dépendance ajoutée : serveurs `node:http`, une page HTML, et `fetch` po
 | **Interface web** | [src/web/webPanel.ts](../src/web/webPanel.ts) | Sert la page et relaie chaque requête au bot choisi. Le navigateur ne parle qu'à l'interface, et ne voit jamais les tokens. |
 | **Connexions** | [src/web/botConnection.ts](../src/web/botConnection.ts) | Le bot du service est modifié directement ; les autres via leur API. |
 
-La librairie ne lit ni `.env` ni fichier : tous les réglages lui sont passés par le bot. Ci-dessous, les variables d'environnement et les fichiers `otterbots.yml` et `panel.yml` (à la racine du projet, à côté du `.env`) sont ceux choisis par le **bot d'exemple** ([example/index.ts](../example/index.ts) et [example/panel.ts](../example/panel.ts)) ; un autre bot peut les nommer comme il veut.
+Avec `bot.run()` et `runWebPanel()`, tout se règle par les variables d'environnement ci-dessous, et les fichiers `otterbots.yml` et `panel.yml` sont cherchés à la racine du projet (à côté du `.env`). Pour les choisir depuis le code, voir [Depuis le code](#depuis-le-code).
 
 L'interface peut tourner :
 
@@ -165,7 +165,15 @@ await bot.startWebPanel({
 
 `bot.stop()` arrête aussi l'interface et l'API.
 
-Interface seule, sans bot dans le process (voir [example/panel.ts](../example/panel.ts)) :
+Interface seule, sans bot dans le process, réglée par le `.env` et `panel.yml` (voir [example/panel.ts](../example/panel.ts)) :
+
+```ts
+import { runWebPanel } from 're-otterbots';
+
+runWebPanel();
+```
+
+Ou en passant les réglages soi-même :
 
 ```ts
 import { WebPanel, createBotConnections, loadPanelBots } from 're-otterbots';
