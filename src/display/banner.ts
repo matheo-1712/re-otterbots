@@ -83,7 +83,8 @@ export function printConnecting(): void {
 	console.log(style.dim('Connexion à Discord…'));
 }
 
-export function printReadyBanner(client: Client<true>, startupMs: number): void {
+// links : adresses affichées sous l'invitation (libellé → URL), ignorées si null
+export function printReadyBanner(client: Client<true>, startupMs: number, links: Record<string, string | null> = {}): void {
 	const { user } = client;
 	const invite = `https://discord.com/oauth2/authorize?client_id=${user.id}&scope=bot+applications.commands`;
 
@@ -104,6 +105,9 @@ export function printReadyBanner(client: Client<true>, startupMs: number): void 
 		'',
 		`${style.success('●')} ${style.bold('En ligne')} ${style.dim('— Ctrl+C pour arrêter')}`,
 		`${style.dim('Inviter :')} ${style.accent(invite)}`,
+		...Object.entries(links)
+			.filter((link): link is [string, string] => link[1] !== null)
+			.map(([label, url]) => `${style.dim(`${label} :`)} ${style.accent(url)}`),
 		'',
 	];
 

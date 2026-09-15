@@ -1,0 +1,15 @@
+# Bots pilotés par l'interface web de Re:Otterbots
+# Copie ce fichier vers panel.yml, à la racine du projet qui lance le panneau (ou vers PANEL_CONFIG_FILE). Voir docs/web.md.
+# Ce fichier contient des tokens : il ne doit pas être commité.
+
+bots:
+  # name  : nom affiché dans le panneau
+  # url   : adresse de l'API du bot (API_HOST / API_PORT sur son service)
+  # token : même valeur que API_TOKEN sur le service du bot
+  - name: "Otterbot principal"
+    url: "http://10.0.0.5:4000"
+    token: "remplace-par-un-token-long-et-aleatoire"
+
+  - name: "Otterbot de test"
+    url: "http://otterbot-test:4000"
+    token: "un-autre-token-long-et-aleatoire"

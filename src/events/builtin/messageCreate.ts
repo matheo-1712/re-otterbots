@@ -1,15 +1,11 @@
 import { Events } from 'discord.js';
-import {defineEvent} from "../defineEvent";
+import { guardMessage } from '../../otterguard/guardMessage';
+import { defineEvent } from '../defineEvent';
 
+// OtterGuard : vérifie chaque nouveau message
 export default defineEvent({
-    name: Events.MessageCreate,
-    execute(message) {
-        if (message.content.includes('http://')) {
-            // On supprime le message
-            message.delete().then(r =>
-            console.log('Message supprimé car contient un lien http'));
-        }
-        // On ignore les messages des bots
-        if (message.author.bot) return;
-    },
+	name: Events.MessageCreate,
+	async execute(message, bot) {
+		await guardMessage(message, bot);
+	},
 });

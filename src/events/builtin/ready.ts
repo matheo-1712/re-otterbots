@@ -6,8 +6,11 @@ import { defineEvent } from '../defineEvent';
 export default defineEvent({
 	name: Events.ClientReady,
 	once: true,
-	execute(client) {
+	execute(client, bot) {
 		// Temps écoulé depuis le lancement du process
-		printReadyBanner(client, Math.round(performance.now()));
+		printReadyBanner(client, Math.round(performance.now()), {
+			'Interface web': bot.webPanelUrl,
+			'API': bot.apiUrl,
+		});
 	},
 });

@@ -23,7 +23,22 @@ export default defineEvent({
 |---|---|---|
 | `name` | `keyof ClientEvents` | L'événement discord.js à écouter. Utilise l'enum `Events` (`Events.MessageCreate`, `Events.GuildCreate`…). |
 | `once` | `boolean` (optionnel) | `true` : l'event ne s'exécute qu'une seule fois. Par défaut, il s'exécute à chaque occurrence. |
-| `execute` | fonction, synchrone ou `async` | Reçoit les arguments de l'événement. |
+| `execute` | fonction, synchrone ou `async` | Reçoit les arguments de l'événement, puis **le bot** en dernier argument. |
+
+### Accéder au bot depuis un event
+
+Le dernier argument de `execute` est l'instance `Otterbots`. Elle donne accès à la configuration et aux logs :
+
+```ts
+export default defineEvent({
+	name: Events.GuildMemberAdd,
+	async execute(member, bot) {
+		await bot.logs.send('arrivees', { title: `${member.user.tag} a rejoint le serveur` });
+	},
+});
+```
+
+Un event qui n'en a pas besoin peut simplement ignorer cet argument : `execute(guild) { … }`.
 
 ### Pourquoi passer par `defineEvent` ?
 
@@ -80,7 +95,8 @@ Le constructeur d'`Otterbots` charge automatiquement le dossier [src/events/buil
 | [ready.ts](../src/events/builtin/ready.ts) | `ClientReady` (une fois) | Affiche l'[écran de connexion](affichage.md) |
 | [warn.ts](../src/events/builtin/warn.ts) | `Warn` | Affiche les avertissements non bloquants de discord.js, sous l'[écran de connexion](affichage.md#avertissements) |
 | [error.ts](../src/events/builtin/error.ts) | `Error` | Affiche les erreurs de discord.js |
-| [messageCreate.ts](../src/events/builtin/messageCreate.ts) | `MessageCreate` | Affiche chaque message reçu et son auteur |
+| [messageCreate.ts](../src/events/builtin/messageCreate.ts) | `MessageCreate` | [OtterGuard](otterguard.md) : [anti-spam](otterguard.md#anti-spam) (même auteur dans plusieurs salons, bots compris), puis suppression des messages qui correspondent aux motifs configurés. Ne fait rien sans configuration. |
+| [messageUpdate.ts](../src/events/builtin/messageUpdate.ts) | `MessageUpdate` | [OtterGuard](otterguard.md) : même vérification quand un message est modifié |
 
 L'event `error` est indispensable : le client hérite de l'`EventEmitter` de Node.js, et un événement `error` émis **sans listener** fait planter le process.
 
