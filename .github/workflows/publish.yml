@@ -1,20 +1,32 @@
 name: Publication npm
 
-# Publie le package sur npm à chaque release GitHub publiée
+# Publie le package sur npm à chaque release GitHub publiée.
+# La version est déduite du tag de la release (v1.2.3 ou 1.2.3) : le package.json est mis à jour,
+# commité sur la branche de la release, et le tag est déplacé sur ce commit.
 on:
   release:
     types: [published]
 
 permissions:
-  contents: read
+  # Pousser le commit de version et déplacer le tag
+  contents: write
   # Nécessaire pour la provenance npm et le Trusted Publishing (OIDC)
   id-token: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name }}
+      BRANCH: ${{ github.event.release.target_commitish }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.target_commitish }}
 
       - uses: actions/setup-node@v4
         with:
@@ -24,18 +36,24 @@ jobs:
 
       - run: npm ci
 
-      # Le tag de la release (v1.2.3 ou 1.2.3) doit correspondre à la version du package.json
-      - name: Vérification de la version
-        run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          VERSION="$(node -p "require('./package.json').version")"
-          if [ "$TAG" != "$VERSION" ]; then
-            echo "::error::Le tag $GITHUB_REF_NAME ne correspond pas à la version $VERSION du package.json"
-            exit 1
-          fi
+      - name: Mise à jour de la version
+        run: npm version "${TAG#v}" --no-git-tag-version --allow-same-version
 
       - run: npm run typecheck
       - run: npm run build
+
+      # Commit du package.json sur la branche, puis le tag est replacé dessus
+      - name: Commit de la version
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet -- package.json package-lock.json; then
+            git add package.json package-lock.json
+            git commit -m "chore(release): ${TAG#v}"
+            git push origin "HEAD:${BRANCH}"
+          fi
+          git tag -f "$TAG"
+          git push -f origin "refs/tags/$TAG"
 
       # Les pré-releases partent sur le dist-tag « next » pour ne pas écraser « latest »
       - name: Publication
