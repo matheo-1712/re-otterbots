@@ -1,0 +1,42 @@
+# Configuration de Re:Otterbots
+# Copie ce fichier vers otterbots.yml, à la racine du projet (ou vers le chemin indiqué dans CONFIG_FILE). Les modifications sont appliquées à chaud.
+
+logs:
+  # Salons de logs : nom → ID du salon Discord (entre guillemets)
+  # Pour copier un ID : mode développeur de Discord, puis clic droit sur le salon > Copier l'identifiant
+  channels:
+    otterguard: "123456789012345678"
+
+otterguard:
+  # false : OtterGuard ne vérifie aucun message (true par défaut)
+  enabled: true
+
+  # true : chaque suppression est aussi signalée dans la console du bot, sans le contenu du message (true par défaut)
+  consoleLog: true
+
+  # Anti-spam : un même auteur (bots compris) qui écrit dans plusieurs salons en peu de temps.
+  # Ses messages sont supprimés, et il peut être exclu temporairement (permission « Exclure temporairement des membres »).
+  # Ajoute à exemptRoles les rôles des bots de confiance qui publient dans plusieurs salons.
+  antiSpam:
+    enabled: true
+    # Nombre de salons différents (2 à 50)…
+    channels: 3
+    # … en moins de ce nombre de secondes (1 à 300)
+    seconds: 10
+    # Exclusion temporaire en minutes (0 : aucune, 40320 maximum)
+    timeoutMinutes: 10
+
+  # Messages supprimés s'ils contiennent l'un de ces motifs (insensible à la casse)
+  #   text  : texte recherché tel quel
+  #   regex : expression régulière (antislashs doublés entre guillemets)
+  #   reason: optionnel, affiché dans le log
+  # 100 motifs maximum, 200 caractères maximum par motif
+  blockedPatterns:
+    - text: "http://"
+      reason: "Liens non sécurisés interdits"
+    - regex: "discord\\.gg/\\w+"
+      reason: "Invitations Discord interdites"
+
+  # Rôles dont les messages ne sont jamais vérifiés (modérateurs…)
+  exemptRoles:
+    - "234567890123456789"

@@ -52,3 +52,7 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 data/
+# Configuration du bot (modifiable à chaud), voir otterbots.example.yml
+/otterbots.yml
+# Bots pilotés par le panneau, avec leurs tokens d'API, voir panel.example.yml
+/panel.yml

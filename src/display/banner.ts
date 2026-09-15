@@ -12,6 +12,7 @@ const style = {
 	dim: (text: string) => paint('2', text),
 	accent: (text: string) => paint('38;5;80', text),
 	success: (text: string) => paint('38;5;114', text),
+	warning: (text: string) => paint('38;5;214', text),
 };
 
 // Lettres du titre « Re:Otterbots » (police figlet small), 4 lignes chacune
@@ -53,11 +54,37 @@ function renderInfoBox(rows: [string, string][]): string[] {
 	return [style.dim(`╭${border}╮`), ...lines, style.dim(`╰${border}╯`)];
 }
 
+// Avertissements reçus avant la fin de la connexion, affichés sous l'écran d'accueil
+const pendingWarnings: string[] = [];
+let warningsReleased = false;
+
+function writeWarning(message: string): void {
+	console.warn(`  ${style.warning('▲')} ${style.dim('[discord.js]')} ${message}`);
+}
+
+export function printWarning(message: string): void {
+	if (warningsReleased) {
+		writeWarning(message);
+	}
+	else {
+		pendingWarnings.push(message);
+	}
+}
+
+// Affiche les avertissements en attente ; les suivants s'afficheront directement
+export function releaseWarnings(): void {
+	warningsReleased = true;
+	for (const message of pendingWarnings.splice(0)) {
+		writeWarning(message);
+	}
+}
+
 export function printConnecting(): void {
 	console.log(style.dim('Connexion à Discord…'));
 }
 
-export function printReadyBanner(client: Client<true>, startupMs: number): void {
+// links : adresses affichées sous l'invitation (libellé → URL), ignorées si null
+export function printReadyBanner(client: Client<true>, startupMs: number, links: Record<string, string | null> = {}): void {
 	const { user } = client;
 	const invite = `https://discord.com/oauth2/authorize?client_id=${user.id}&scope=bot+applications.commands`;
 
@@ -78,8 +105,12 @@ export function printReadyBanner(client: Client<true>, startupMs: number): void 
 		'',
 		`${style.success('●')} ${style.bold('En ligne')} ${style.dim('— Ctrl+C pour arrêter')}`,
 		`${style.dim('Inviter :')} ${style.accent(invite)}`,
+		...Object.entries(links)
+			.filter((link): link is [string, string] => link[1] !== null)
+			.map(([label, url]) => `${style.dim(`${label} :`)} ${style.accent(url)}`),
 		'',
 	];
 
 	console.log(output.map((line) => (line ? `  ${line}` : line)).join('\n'));
+	releaseWarnings();
 }
