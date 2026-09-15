@@ -1,0 +1,44 @@
+name: Publication npm
+
+# Publie le package sur npm à chaque release GitHub publiée
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  # Nécessaire pour la provenance npm et le Trusted Publishing (OIDC)
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - run: npm ci
+
+      # Le tag de la release (v1.2.3 ou 1.2.3) doit correspondre à la version du package.json
+      - name: Vérification de la version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::Le tag $GITHUB_REF_NAME ne correspond pas à la version $VERSION du package.json"
+            exit 1
+          fi
+
+      - run: npm run typecheck
+      - run: npm run build
+
+      # Les pré-releases partent sur le dist-tag « next » pour ne pas écraser « latest »
+      - name: Publication
+        run: npm publish --provenance --access public --tag ${{ github.event.release.prerelease && 'next' || 'latest' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
