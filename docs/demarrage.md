@@ -31,47 +31,64 @@ Le fichier `.env` est ignoré par git : le token ne doit jamais être commité.
 
 La configuration TypeScript ([tsconfig.json](../tsconfig.json)) est en mode `strict` et ne compile que le dossier `src/`.
 
-## La classe `Otterbots`
+## Lancer le bot : `run()`
 
-Définie dans [src/index.ts](../src/index.ts).
+Dans le fichier principal du bot, une ligne suffit :
 
 ```ts
-const bot = new Otterbots(token);
+import { Otterbots } from 're-otterbots';
+
+new Otterbots().run();
 ```
+
+`run()` s'occupe de tout, réglé par le `.env` (voir [.env.example](../.env.example)) :
+
+1. **Charge le `.env`** du dossier courant s'il existe. Sinon, il utilise les variables d'environnement du système (pratique avec Docker ou un hébergeur).
+2. **Charge le fichier de configuration** : `CONFIG_FILE` s'il est défini, sinon `otterbots.yml` à la racine du projet, créé s'il n'existe pas ([choisir son fichier](logs.md#choisir-son-fichier--loadconfig)). Si `loadConfig` a déjà été appelé, ce fichier est gardé.
+3. **Lance l'[interface web](web.md)** (sauf si `WEB_PANEL=false`), avec les bots distants de `panel.yml` s'il existe, et **l'API** si `API_TOKEN` est défini. Si l'une d'elles ne démarre pas, l'erreur est affichée et le bot continue sans elle.
+4. **Connecte le bot** avec `BOT_TOKEN`. En cas d'échec (token absent ou invalide, intent privilégié non activé…), un message clair est affiché et le process s'arrête avec le code `1`.
+5. **Gère l'arrêt** : sur `Ctrl+C` (`SIGINT`) ou `SIGTERM` (arrêt d'un conteneur), le bot se déconnecte avant que le process ne quitte. Les promesses rejetées non gérées sont affichées.
+
+Pour ajouter ses propres events, il suffit de les enregistrer avant `run()` :
+
+```ts
+import { join } from 'node:path';
+import { Otterbots } from 're-otterbots';
+
+const bot = new Otterbots();
+bot.loadEvents(join(__dirname, 'events'));
+bot.run();
+```
+
+## La classe `Otterbots`
+
+Définie dans [src/index.ts](../src/index.ts). `run()` suffit dans la plupart des cas ; les méthodes ci-dessous permettent de tout contrôler depuis le code.
 
 | Méthode | Rôle |
 |---|---|
-| `constructor(token, intents?)` | Crée le client Discord avec les intents donnés (`[GatewayIntentBits.Guilds]` par défaut) et enregistre les [events intégrés](events.md#events-intégrés). Lève une erreur si le token est vide. |
+| `constructor(options?)` | Crée le client Discord et enregistre les [events intégrés](events.md#events-intégrés). Options : `token` (par défaut `BOT_TOKEN`, lu au démarrage) et `intents`. `new Otterbots(token, intents?)` reste accepté. |
+| `run()` | Lance tout à partir du `.env`, voir [Lancer le bot](#lancer-le-bot--run). |
 | `loadConfig(chemin, options?)` | Définit le fichier YAML de configuration : chemin libre, création s'il manque, rechargement à chaud. Voir [Choisir son fichier](logs.md#choisir-son-fichier--loadconfig). |
 | `addEvents(...events)` | Ajoute des events personnalisés. À appeler **avant** `start()`. Renvoie le bot, donc les appels peuvent s'enchaîner. |
 | `startWebPanel(options?)` | Lance l'[interface web](web.md) pour ce bot et les bots distants donnés. Renvoie une promesse qui échoue si le serveur ne peut pas démarrer. |
 | `startApi(options)` | Lance l'[API](web.md#api-dun-bot) qui permet de configurer ce bot depuis un autre service. |
-| `start()` | Affiche « Connexion à Discord… » puis connecte le bot. Renvoie une promesse qui échoue si la connexion est refusée (token invalide, réseau…). |
+| `start()` | Affiche « Connexion à Discord… » puis connecte le bot. Renvoie une promesse qui échoue si le token manque ou si la connexion est refusée (token invalide, réseau…). Ne lit pas le `.env` : c'est le rôle de `run()`. |
 | `stop()` | Déconnecte proprement le bot de Discord. |
 
 ### Intents
 
-Par défaut, le client est créé avec le seul intent `Guilds`, suffisant pour se connecter et connaître la liste des serveurs. Pour en demander d'autres, passe-les en second argument :
+Par défaut, le client est créé avec `Guilds`, `GuildMessages` et `MessageContent` : c'est ce dont [OtterGuard](otterguard.md) a besoin pour lire les messages. `MessageContent` est un intent **privilégié** : il faut l'activer sur le Developer Portal (onglet *Bot*, « Message Content Intent »), sinon la connexion est refusée.
+
+Pour en demander d'autres :
 
 ```ts
-const bot = new Otterbots(token, [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]);
+const bot = new Otterbots({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 ```
-
-Un event qui lit les messages demandera en plus `GuildMessages` et `MessageContent`. `MessageContent` est un intent **privilégié** : il faut aussi l'activer sur le Developer Portal.
 
 ## Le bot d'exemple `example/`
 
-La librairie ne se configure pas elle-même : elle sera installée comme module npm, ses fichiers ne doivent pas être modifiés. [example/index.ts](../example/index.ts) joue le rôle d'un bot qui l'utilise, et c'est lui qui est exécuté par `npm run dev` et `npm start`. Dans l'ordre, il :
-
-1. **Charge le `.env`** s'il existe. Sinon, il utilise les variables d'environnement du système (pratique avec Docker ou un hébergeur).
-2. **Vérifie `BOT_TOKEN`** et quitte avec un message clair s'il est absent.
-3. **Crée le bot** et charge le fichier de configuration : `CONFIG_FILE` s'il est défini, sinon `otterbots.yml` à la racine du projet (à côté du `.env`), créé s'il n'existe pas ([choisir son fichier](logs.md#choisir-son-fichier--loadconfig)).
-4. **Lance l'[interface web](web.md)** (sauf si `WEB_PANEL=false`), l'API (si `API_TOKEN` est défini) et la connexion. Si la connexion échoue, l'erreur est affichée et le process s'arrête avec le code `1`.
-5. **Gère l'arrêt** : sur `Ctrl+C` (`SIGINT`) ou `SIGTERM` (arrêt d'un conteneur), le bot se déconnecte avant que le process ne quitte.
-6. **Affiche les promesses rejetées non gérées** au lieu de les laisser passer sans rien dire.
+[example/index.ts](../example/index.ts) joue le rôle d'un bot qui utilise la librairie : c'est lui qui est exécuté par `npm run dev` et `npm start`. Il se résume à `new Otterbots().run()`, et [example/panel.ts](../example/panel.ts) à `runWebPanel()`.
 
 Il importe la librairie depuis `../src` ; un vrai bot écrirait `import { Otterbots } from 're-otterbots'`.
-
-Le token est vérifié avant d'être passé au constructeur : `process.env.BOT_TOKEN` est de type `string | undefined`, et TypeScript refuse de le passer tel quel à un paramètre `string` (erreur `TS2345`). Après le `if (!token)`, TypeScript sait que `token` est une `string`.
 
 Le dossier `example/` n'est pas inclus dans `tsconfig.json` : `npm run typecheck` ne le vérifie pas.
